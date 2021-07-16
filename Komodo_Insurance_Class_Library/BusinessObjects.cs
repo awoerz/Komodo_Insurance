@@ -87,22 +87,12 @@ namespace Komodo_Insurance_Class_Library
 
         public bool RemoveDeveloperById(int id)
         {
-            List<Developer> AnotherDevTeam = new List<Developer>();
-
-            Console.WriteLine("Please enter the ID of the Developer that you would like to remove to the Development Team");
-            foreach (var dev in DevTeam)
-            {
-                Console.WriteLine($"ID: {dev.ID}, Name: {dev.Name}");
-            }
-            Console.WriteLine("");
-            string userInputAsString = Console.ReadLine();
-            var devToRemove = GetDevFromTeamById(int.Parse(userInputAsString));
+            var devToRemove = GetDevFromTeamById(id);
             if (devToRemove != null)
             {
                 DevTeam.Remove(devToRemove);
                 return true;
             }
-
             return false;
         }
 

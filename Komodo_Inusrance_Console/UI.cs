@@ -20,7 +20,6 @@ namespace Komodo_Inusrance_Console
             PrintMenu();
         }
 
-
         private void PrintMenu()
         {
             bool keepGoing = true;
@@ -258,10 +257,10 @@ namespace Komodo_Inusrance_Console
                 "2. View All Development Teams\n" +
                 "3. View A Specific Development Team And It's Developers\n" +
                 "4. Update A Development Team Name\n" +
-                "5. Add Developers From A Development Team\n" +
+                "5. Add Developers To A Development Team\n" +
                 "6. Remove Developers From A Development Team\n" +
                 "7. Add Multiple Developers To A Development Team\n" +
-                "8. Go back to main menu.\n");
+                "8. Go Back To Main Menu.\n");
 
             string userChoice = Console.ReadLine();
             Console.Clear();
