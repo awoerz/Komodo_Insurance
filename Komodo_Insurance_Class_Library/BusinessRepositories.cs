@@ -11,14 +11,6 @@ namespace Komodo_Insurance_Class_Library
         //Properties
         private List<BusinessObjects> _objectRepository = new List<BusinessObjects>();
 
-        //Getter
-        public List<BusinessObjects> GetBusinessObjects()
-        {
-            return _objectRepository;
-        }
-
-        //Public Methods
-
         //Create
         public void AddObjectToRepository(BusinessObjects passedObject)
         {
@@ -26,12 +18,9 @@ namespace Komodo_Insurance_Class_Library
         }
 
         //Read
-        public void ViewRepositoryObjects()
+        public List<BusinessObjects> GetBusinessObjects()
         {
-            foreach (var obj in _objectRepository)
-            {
-                Console.WriteLine($"ID: {obj.ID}, Name: {obj.Name}");
-            }
+            return _objectRepository;
         }
 
         public bool IsEmpty()
@@ -96,6 +85,7 @@ namespace Komodo_Insurance_Class_Library
             return null;
         }
     }
+    
     public class DeveloperRepository : BusinessRepository
     {
         //Getter - Change Business Objects To Developer Objects and Return as List.
@@ -124,28 +114,20 @@ namespace Komodo_Insurance_Class_Library
             }
             return devsWithoutPluralsightAccess;
         }
-
-        public void printDevelopersInRepo()
-        {
-            List<Developer> devsInRepo = GetDevelopersInRepository();
-            foreach (Developer dev in devsInRepo)
-            {
-                Console.WriteLine($"ID: {dev.ID}, Name: {dev.Name}, Has Pluralsight Acces: {dev.HasPluralsightAccess}");
-            }
-        }
     }
+    
     public class DevelopmentTeamRepository : BusinessRepository
     {
         //Getter - Change Business Objects to DevelopmentTeam Objects and Return as List.
         public List<DevelopmentTeam> GetDevelopmentTeamsInRepository()
         {
-            List<DevelopmentTeam> DevelopmentTeamToReturn = new List<DevelopmentTeam>();
+            List<DevelopmentTeam> DevelopmentTeamsToReturn = new List<DevelopmentTeam>();
             List<BusinessObjects> businessObjects = GetBusinessObjects();
             foreach (var businessObject in businessObjects)
             {
-                DevelopmentTeamToReturn.Add((DevelopmentTeam)businessObject);
+                DevelopmentTeamsToReturn.Add((DevelopmentTeam)businessObject);
             }
-            return DevelopmentTeamToReturn;
+            return DevelopmentTeamsToReturn;
         }
 
         public DevelopmentTeam GetDevelopmentTeamById(int id)

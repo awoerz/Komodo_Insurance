@@ -51,38 +51,33 @@ namespace Komodo_Insurance_Class_Library
         }
 
         //Public Methods
-        public bool AddDevelopers(List<Developer> DeveloperRepositoryDevs)
+        public bool AddSingleDeveloper(Developer dev)
         {
-            //Initializing devs that are not already on the dev team list:
-            var devsAbleToAdd = new List<Developer>();
-
-            //If DevTeam is not null (Meaning already instantiated) then make sure those devs are on list to add again.
-            if (DevTeam != null)
+            if (dev != null)
             {
-                devsAbleToAdd = DeveloperRepositoryDevs.Except(DevTeam).ToList();
-            }
-            else
-            //else instantiate the Dev Team and add all of the developers in developer repo to list of developers we can add to a dev team.
-            {
-                DevTeam = new List<Developer>();
-                devsAbleToAdd = DeveloperRepositoryDevs;
-            }
-
-            Console.WriteLine("Please enter the ID of the Developer that you would like to add to the Development Team");
-            foreach (var dev in devsAbleToAdd)
-            {
-                Console.WriteLine($"ID: {dev.ID}, Name: {dev.Name}");
-            }
-            Console.WriteLine("");
-            string userInputAsString = Console.ReadLine();
-            var devToAdd = GetDeveloperFromListById(DeveloperRepositoryDevs, int.Parse(userInputAsString));
-            if (devToAdd != null)
-            {
-                DevTeam.Add(devToAdd);
+                DevTeam.Add(dev);
                 return true;
             }
+            else
+            {
+                return true;
+            }
+        }
 
-            return false;
+        public bool AddDevelopers(List<Developer> DevelopersToAddToDevTeam)
+        {
+            if(DevelopersToAddToDevTeam.Count > 0)
+            {
+                foreach (Developer dev in DevelopersToAddToDevTeam)
+                {
+                    DevTeam.Add(dev);
+                }
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public bool RemoveDeveloperById(int id)
@@ -109,16 +104,5 @@ namespace Komodo_Insurance_Class_Library
             return null;
         }
 
-        private Developer GetDeveloperFromListById(List<Developer> devList, int id)
-        {
-            foreach (var dev in devList)
-            {
-                if (dev.ID == id)
-                {
-                    return dev;
-                }
-            }
-            return null;
-        }
     }
 }

@@ -14,12 +14,14 @@ namespace Komodo_Inusrance_Console
         //Dictionary is used as a connection point for DevRepo and DevTeamRepo, they key should be a developer ID and the value should be a DevTeam ID.
         private Dictionary<int, int> DevsOnTeam = new Dictionary<int, int>();
 
+        //UI Run Method
         public void Run()
         {
             SeedContent();
             PrintMenu();
         }
 
+        //Menu Methods
         private void PrintMenu()
         {
             bool keepGoing = true;
@@ -29,7 +31,7 @@ namespace Komodo_Inusrance_Console
                 Console.WriteLine("MAIN MENU\n" +
                     "Welcome. What would you like to do?\n" +
                     "1. Go to developer menu.\n" +
-                    "2. Go to developer team menu.\n" +
+                    "2. Go to development team menu.\n" +
                     "3. Exit the application.\n");
 
                 string userChoice = Console.ReadLine();
@@ -41,7 +43,7 @@ namespace Komodo_Inusrance_Console
                         DeveloperMenu();
                         break;
                     case "2":
-                        PrintDeveloperTeamMenu();
+                        DevelopmentTeamMenu();
                         break;
                     case "3":
                         Console.WriteLine("Thank you for using the application\n" +
@@ -54,24 +56,22 @@ namespace Komodo_Inusrance_Console
                         break;
                 }
             }
-
         }
 
         private void DeveloperMenu()
         {
             bool continueDevMenu = true;
-
             while (continueDevMenu)
             {
                 Console.Clear();
                 Console.WriteLine("DEVELOPER MENU\n" +
-                    "Please select which action you would like to perform: \n" +
-                    "1. Add A New Developer\n" +
-                    "2. View All Developers\n" +
-                    "3. View A Specific Developer\n" +
-                    "4. Update A Developer\n" +
-                    "5. Remove A Developer\n" +
-                    "6. View All Developers That Require Pluralsight Acces\n" +
+                    "Please select which action you would like to perform: \n\n" +
+                    "1. Add a new developer\n" +
+                    "2. View all developers\n" +
+                    "3. View a specific developer\n" +
+                    "4. Update a developer\n" +
+                    "5. Remove a developer\n" +
+                    "6. View all developers that require pluralsight acces\n" +
                     "7. Go back to main menu\n");
 
                 string userChoice = Console.ReadLine();
@@ -105,13 +105,13 @@ namespace Komodo_Inusrance_Console
                         break;
                     //View all developers
                     case "2":
-                        DevRepo.printDevelopersInRepo();
+                        PrintDevelopersInRepo();
                         PressAnyKeyToContinue();
                         break;
                     //View a specific developer
                     case "3":
-                        DevRepo.printDevelopersInRepo();
-                        Console.WriteLine("Please provide the ID of the user you'd like to see more specifically.");
+                        Console.WriteLine("Please provide the ID of the user you'd like to see more specifically.\n");
+                        PrintDevelopersInRepo();
                         int userSelectedId = int.Parse(Console.ReadLine());
                         Developer specifiedDeveloper = (Developer)DevRepo.GetBusinessObjectsById(userSelectedId);
                         Console.Clear();
@@ -119,7 +119,7 @@ namespace Komodo_Inusrance_Console
 
                         if (DevsOnTeam.ContainsKey(userSelectedId))
                         {
-                            DevelopmentTeam devsDevTeam = GetDevelopersDevTeamByDeveloperId(userSelectedId);
+                            DevelopmentTeam devsDevTeam = DevTeamRepo.GetDevelopmentTeamById(userSelectedId);
                             Console.WriteLine($"Assigned Development Team: {devsDevTeam.Name} - ID: {devsDevTeam.ID}");
                         }
                         else
@@ -131,12 +131,11 @@ namespace Komodo_Inusrance_Console
                         break;
                     //Update a developer
                     case "4":
-                        DevRepo.printDevelopersInRepo();
+                        Console.WriteLine("Please provide the ID of the user you'd like to update.\n");
+                        PrintDevelopersInRepo();
 
-                        //Get The Developer
-                        Console.WriteLine("Please provide the ID of the user you'd like to update.");
-                        int developertoUpdateId = int.Parse(Console.ReadLine());
-                        Developer originalDeveloper = (Developer)DevRepo.GetBusinessObjectsById(developertoUpdateId);
+                        int developerToUpdateId = int.Parse(Console.ReadLine());
+                        Developer originalDeveloper = (Developer)DevRepo.GetBusinessObjectsById(developerToUpdateId);
 
                         Developer newDeveloper = new Developer(originalDeveloper.ID, originalDeveloper.Name, originalDeveloper.HasPluralsightAccess);
 
@@ -152,7 +151,10 @@ namespace Komodo_Inusrance_Console
                             if (newID.GetType() == typeof(int))
                             {
                                 newDeveloper.ID = newID;
-                                UpdateUserIdInDictionary(originalDeveloper.ID, newID);
+                                //Cheks if developer is on a dev team and updates the ID in the dictionary if so.
+                                if(DevsOnTeam.ContainsKey(developerToUpdateId)) {
+                                    UpdateUserIdInDictionary(developerToUpdateId, newID);
+                                }
                             }
                         }
 
@@ -174,7 +176,7 @@ namespace Komodo_Inusrance_Console
                         }
 
                         //Update Developer with DevRepo method
-                        DevRepo.UpdateRepositoryObjectById(developertoUpdateId, newDeveloper);
+                        DevRepo.UpdateRepositoryObjectById(developerToUpdateId, newDeveloper);
                         if (userReply == "Y" || userReplyTwo == "Y" || userReplyThree == "Y")
                         {
                             Console.WriteLine("Your selected user has been updated.");
@@ -187,16 +189,16 @@ namespace Komodo_Inusrance_Console
                         break;
                     //Remove a developer
                     case "5":
-                        DevRepo.printDevelopersInRepo();
                         Console.WriteLine("Please select a developer that you would like to remove by their ID\n" +
-                            "!!!WARNING: removing a developer will remove them from their respective development team!!!");
+                            "!!!WARNING: removing a developer will remove them from their respective development team!!!\n");
+                        PrintDevelopersInRepo();
 
                         int devToRemoveId = int.Parse(Console.ReadLine());
-                        Developer devToRemove = (Developer)DevRepo.GetBusinessObjectsById(devToRemoveId);
+                        Developer devToRemove = (Developer)DevRepo.GetBusinessObjectsById(DevsOnTeam[devToRemoveId]);
 
                         if (devToRemove != null)
                         {
-                            if (IsDevOnADevTeam(devToRemove))
+                            if (DevsOnTeam.ContainsKey(devToRemoveId)) 
                             {
                                 int devTeamId = DevsOnTeam[devToRemove.ID]; //Get the devTeams ID based on Devs Id
                                 DevelopmentTeam devsDevelopmentTeam = DevTeamRepo.GetDevelopmentTeamById(devTeamId); //Get the entire team from repo as copy
@@ -238,7 +240,6 @@ namespace Komodo_Inusrance_Console
                     //Return to menu
                     case "7":
                         continueDevMenu = false;
-                        PressAnyKeyToContinue();
                         break;
                     default:
                         Console.WriteLine("Option invalid. Returning to the developer menu.");
@@ -246,50 +247,96 @@ namespace Komodo_Inusrance_Console
                         break;
                 }
             }
-
         }
 
-        private void PrintDeveloperTeamMenu()
+        private void DevelopmentTeamMenu()
         {
-            Console.Clear();
-            Console.WriteLine("\n" +
-                "1. Add A Development Team\n" +
-                "2. View All Development Teams\n" +
-                "3. View A Specific Development Team And It's Developers\n" +
-                "4. Update A Development Team Name\n" +
-                "5. Add Developers To A Development Team\n" +
-                "6. Remove Developers From A Development Team\n" +
-                "7. Add Multiple Developers To A Development Team\n" +
-                "8. Go Back To Main Menu.\n");
+            bool continueDevTeamMenu = true;
 
-            string userChoice = Console.ReadLine();
-            Console.Clear();
-            switch (userChoice)
+            while (continueDevTeamMenu)
             {
-                case "1":
-                    break;
-                case "2":
-                    break;
-                case "3":
-                    break;
-                case "4":
-                    break;
-                case "5":
-                    break;
-                case "6":
-                    break;
-                case "7":
-                    break;
-                case "8":
-                    PressAnyKeyToContinue();
-                    break;
-                default:
-                    Console.WriteLine("Option invalid. Returning to the main menu.");
-                    PressAnyKeyToContinue();
-                    break;
+                Console.Clear();
+                Console.WriteLine("DEVELOPMENT TEAM MENU\n" +
+                    "1. Add a development team\n" +
+                    "2. View all development teams\n" +
+                    "3. View a specific development team and it's developers\n" +
+                    "4. Update a development team name\n" +
+                    "5. Add developers to a development team\n" +
+                    "6. Remove developers from a development team\n" +
+                    "7. Add multiple developers to a development team\n" +
+                    "8. Go back to main menu.\n");
+
+                string userChoice = Console.ReadLine();
+                Console.Clear();
+                switch (userChoice)
+                {
+                    //Add a dev team
+                    case "1":
+                        DevelopmentTeam devTeamToAdd = new DevelopmentTeam();
+                        DevTeamRepo.AddObjectToRepository(devTeamToAdd);
+
+                        Console.WriteLine("Please provide an ID for the development team:");
+                        devTeamToAdd.ID = int.Parse(Console.ReadLine());
+
+                        Console.WriteLine("What would you like to name this development team?");
+                        devTeamToAdd.Name = Console.ReadLine();
+
+                        Console.WriteLine("Would you like to add any developers to the dev team? Y/N");
+                        string userReply = Console.ReadLine().ToUpper();
+                        if (userReply == "Y")
+                        {
+                            AddMultipleDevelopersToTeam(devTeamToAdd.ID);
+                        }
+                        Console.WriteLine("Your Dev team has been added.");
+                        PressAnyKeyToContinue();
+                        break;
+                    case "2":
+                        PrintDevelopmentTeamsInRepo();
+                        PressAnyKeyToContinue();
+                        break;
+                    case "3":
+                        Console.WriteLine("Please select a development team from the following list to add to view the members of.");
+                        PrintDevelopmentTeamsInRepo();
+                        int userSelection = int.Parse(Console.ReadLine());
+
+                        Console.Clear();
+                        DevelopmentTeam userSelectedDevTeam = DevTeamRepo.GetDevelopmentTeamById(userSelection);
+                        List<Developer> devTeamDevList = userSelectedDevTeam.DevTeam;
+                        if(devTeamDevList.Count > 0)
+                        {
+                            Console.WriteLine($"ID: {userSelectedDevTeam.ID}, Name: {userSelectedDevTeam.Name}\n" +
+                                $"Dev Team Members:");
+                            foreach (Developer dev in devTeamDevList)
+                            {
+                                Console.WriteLine($"ID: {dev.ID}, Name: {dev.Name}, Has Pluralsight Access: {dev.HasPluralsightAccess}");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Sorry, but {userSelectedDevTeam.Name} has no developers assigned.");
+                        }
+                        PressAnyKeyToContinue();
+                        break;
+                    case "4":
+                        break;
+                    case "5":
+                        break;
+                    case "6":
+                        break;
+                    case "7":
+                        break;
+                    case "8":
+                        continueDevTeamMenu = false;
+                        break;
+                    default:
+                        Console.WriteLine("Option invalid. Returning to the development team menu.");
+                        PressAnyKeyToContinue();
+                        break;
+                }
             }
         }
 
+        //Helper Methods
         private void PressAnyKeyToContinue()
         {
             Console.WriteLine("\n" +
@@ -341,19 +388,99 @@ namespace Komodo_Inusrance_Console
             DevTeamRepo.AddObjectToRepository(devTeamGamma);
         }
 
-        private bool IsDevOnADevTeam(Developer passDeveloper)
+        private void AddMultipleDevelopersToTeam(int TeamID)
         {
-            return DevsOnTeam.ContainsKey(passDeveloper.ID);
+            bool keepAdding = true;
+            string passedTeamName = DevTeamRepo.GetDevelopmentTeamById(TeamID).Name;
+            DevelopmentTeam devTeamToGetDevs = new DevelopmentTeam(new List<Developer>(), TeamID, passedTeamName);
+            List<Developer> devsAddingToTeam = new List<Developer>();
+            List<int> validDevIds = new List<int>();
+            while (keepAdding)
+            {
+                //Check if there are developers that are able to be added.
+                validDevIds.Clear();
+                foreach (Developer dev in DevRepo.GetDevelopersInRepository())
+                {
+                    //If the dev is not on a dev team
+                    if (!DevsOnTeam.ContainsKey(dev.ID))
+                    {
+                        validDevIds.Add(dev.ID);
+                    }
+                }
+                if (validDevIds.Count == 0)
+                {
+                    Console.WriteLine("Sorry but there are no more developers that not already assigned to a development team at this time.");
+                    keepAdding = false;
+                }
+                else
+                {
+                    Console.WriteLine("The following developers are available. Please select the ID of the developer you'd like to add.\n" +
+                        "If you entered this menu by mistake and wish to exit, enter the letter E.");
+                    foreach (int devId in validDevIds)
+                    {
+                        Developer currentdev = (Developer)DevRepo.GetBusinessObjectsById(devId);
+                        Console.WriteLine($"ID: {currentdev.ID}, Name: {currentdev.Name}, Access to pluralsight: {currentdev.HasPluralsightAccess}");
+                    }
+                    var userInput = Console.ReadLine().ToUpper();
+                    //Exit if user screwed up.
+                    if (userInput == "E")
+                    {
+                        keepAdding = false;
+                    }
+                    else
+                    {
+                        int selectedDevsId = int.Parse(userInput);
+                        if (validDevIds.Contains(selectedDevsId))
+                        {
+                            Developer devToAdd = (Developer)DevRepo.GetBusinessObjectsById(int.Parse(userInput));
+                            DevsOnTeam.Add(devToAdd.ID, TeamID);
+                            devsAddingToTeam.Add(devToAdd);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Your selection was invalid. Please try again.");
+                        }
+                    }
+                    Console.WriteLine("Would you like to add an additional developer? Y/N");
+                    userInput = Console.ReadLine().ToUpper();
+                    if (userInput == "N")
+                    {
+                        keepAdding = false;
+                    }
+                    else if (userInput != "Y")
+                    {
+                        Console.WriteLine("Selection is invalid. Leaving developer addition");
+                        keepAdding = false;
+                    }
+                }
+            }
+            if (devsAddingToTeam != null)
+            {
+                devTeamToGetDevs.AddDevelopers(devsAddingToTeam);
+            }
         }
 
-        private DevelopmentTeam GetDevelopersDevTeamByDeveloperId(int id)
+        private void PrintDevelopersInRepo()
         {
-            DevelopmentTeam devsDevelopmentTeam = DevTeamRepo.GetDevelopmentTeamById(DevsOnTeam[id]);
-            return devsDevelopmentTeam;
+            List<Developer> devsInRepo = DevRepo.GetDevelopersInRepository();
+            foreach(Developer dev in devsInRepo)
+            {
+                Console.WriteLine($"ID: {dev.ID}, Name: {dev.Name}, Has PluralsightAccess {dev.HasPluralsightAccess}");
+            }
         }
 
+        private void PrintDevelopmentTeamsInRepo()
+        {
+            List<DevelopmentTeam> devTeamsInRepo = DevTeamRepo.GetDevelopmentTeamsInRepository();
+            foreach (DevelopmentTeam devTeam in devTeamsInRepo)
+            {
+                Console.WriteLine($"ID: {devTeam.ID}, Name: {devTeam.Name}");
+            }
+        }
+
+        //Dictionary Helper Methods
         private void UpdateUserIdInDictionary(int ID, int newID)
-        {
+        { 
             int devsDevTeam = DevsOnTeam[ID];
             DevsOnTeam.Add(newID, devsDevTeam);
             DevsOnTeam.Remove(ID);
