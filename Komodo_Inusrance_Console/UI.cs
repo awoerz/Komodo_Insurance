@@ -82,14 +82,18 @@ namespace Komodo_Inusrance_Console
                     //Add a new developer
                     case "1":
                         Developer DevToAdd = new Developer();
-                        Console.WriteLine("Please provide an ID for the developer: ");
-                        DevToAdd.ID = int.Parse(Console.ReadLine());
+
+                        Console.WriteLine("Please provide a integer value for the developer's new ID.");
+                        int newDevID = GetUserInputAsInt();
+                        DevToAdd.ID = newDevID;
 
                         Console.WriteLine("Please provide the developer's name:");
                         DevToAdd.Name = Console.ReadLine();
 
+
                         Console.WriteLine("Does the developer need access to pluralsight? Y/N");
                         string userResponse = Console.ReadLine().ToUpper();
+                        
                         if (userResponse == "Y")
                         {
                             DevToAdd.HasPluralsightAccess = true;
@@ -101,58 +105,81 @@ namespace Komodo_Inusrance_Console
 
                         DevRepo.AddObjectToRepository(DevToAdd);
                         Console.WriteLine("The user has been added.");
+
                         PressAnyKeyToContinue();
                         break;
+
                     //View all developers
                     case "2":
                         PrintDevelopersInRepo();
+                        
                         PressAnyKeyToContinue();
                         break;
+
                     //View a specific developer
                     case "3":
-                        Console.WriteLine("Please provide the ID of the user you'd like to see more specifically.\n");
+                        Console.WriteLine("Please provide the ID of the developer you'd like to see more specifically.\n");
                         PrintDevelopersInRepo();
-                        int userSelectedId = int.Parse(Console.ReadLine());
-                        Developer specifiedDeveloper = (Developer)DevRepo.GetBusinessObjectsById(userSelectedId);
-                        Console.Clear();
-                        Console.WriteLine($"ID: {specifiedDeveloper.ID}, Name: {specifiedDeveloper.Name}, Has Pluralsight Access: {specifiedDeveloper.HasPluralsightAccess}");
+                        int userSelectedId = GetUserInputAsInt();
 
-                        if (DevsOnTeam.ContainsKey(userSelectedId))
+                        if (!DevRepo.RepositoryContainsObject(userSelectedId))
                         {
-                            DevelopmentTeam devsDevTeam = DevTeamRepo.GetDevelopmentTeamById(userSelectedId);
-                            Console.WriteLine($"Assigned Development Team: {devsDevTeam.Name} - ID: {devsDevTeam.ID}");
+                            Console.WriteLine("Please try again. Entry does not contain a valid user number.");
                         }
                         else
                         {
-                            Console.WriteLine("Developer is not assigned to a Development Team");
+
+                            Developer specifiedDeveloper = (Developer)DevRepo.GetBusinessObjectsById(userSelectedId);
+                            Console.Clear();
+                            Console.WriteLine($"ID: {specifiedDeveloper.ID}, Name: {specifiedDeveloper.Name}, Has Pluralsight Access: {specifiedDeveloper.HasPluralsightAccess}");
+
+                            if (DevsOnTeam.ContainsKey(userSelectedId))
+                            {
+                                DevelopmentTeam devsDevTeam = DevTeamRepo.GetDevelopmentTeamById(userSelectedId);
+                                Console.WriteLine($"Assigned Development Team: {devsDevTeam.Name} - ID: {devsDevTeam.ID}");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Developer is not assigned to a Development Team");
+                            }
                         }
 
                         PressAnyKeyToContinue();
                         break;
+
                     //Update a developer
                     case "4":
                         Console.WriteLine("Please provide the ID of the user you'd like to update.\n");
                         PrintDevelopersInRepo();
 
-                        int developerToUpdateId = int.Parse(Console.ReadLine());
+                        int developerToUpdateId = GetUserInputAsInt();
+
+                        if (!DevRepo.RemoveRepositoryObjectById(developerToUpdateId))
+                        {
+                            Console.WriteLine("A developer ");
+                        }
+
                         Developer originalDeveloper = (Developer)DevRepo.GetBusinessObjectsById(developerToUpdateId);
 
                         Developer newDeveloper = new Developer(originalDeveloper.ID, originalDeveloper.Name, originalDeveloper.HasPluralsightAccess);
 
                         Console.WriteLine("Would you like to update the user's ID? Y/N");
-
                         string userReply = Console.ReadLine().ToUpper();
                         if (userReply == "Y")
                         {
                             Console.WriteLine("What is the user's new ID?");
 
-                            int newID = int.Parse(Console.ReadLine());
-
-                            if (newID.GetType() == typeof(int))
+                            int newID = GetUserInputAsInt();
+                            if(newID == 0)
+                            {
+                                Console.WriteLine("Sorry but the provided value was not a value that can be used as an ID.");
+                            }
+                            else
                             {
                                 newDeveloper.ID = newID;
                                 //Cheks if developer is on a dev team and updates the ID in the dictionary if so.
-                                if(DevsOnTeam.ContainsKey(developerToUpdateId)) {
+                                if (DevsOnTeam.ContainsKey(developerToUpdateId))
+                                {
                                     UpdateUserIdInDictionary(developerToUpdateId, newID);
                                 }
                             }
@@ -185,8 +212,10 @@ namespace Komodo_Inusrance_Console
                         {
                             Console.WriteLine("Why did you click this option then?");
                         }
+                        
                         PressAnyKeyToContinue();
                         break;
+
                     //Remove a developer
                     case "5":
                         Console.WriteLine("Please select a developer that you would like to remove by their ID\n" +
@@ -219,8 +248,10 @@ namespace Komodo_Inusrance_Console
                         {
                             Console.WriteLine("The developer you selected could not be found. Please try again.");
                         }
+                        
                         PressAnyKeyToContinue();
                         break;
+
                     //Show all devs with pluralsight access.
                     case "6":
                         List<Developer> devsWithoutPluralsight = DevRepo.GetDevelopersInRepositoryWithoutPluralsightAccess();
@@ -235,14 +266,17 @@ namespace Komodo_Inusrance_Console
                         {
                             Console.WriteLine("All developers in developer repo have pluralsight access.");
                         }
+                        
                         PressAnyKeyToContinue();
                         break;
+
                     //Return to menu
                     case "7":
                         continueDevMenu = false;
                         break;
                     default:
                         Console.WriteLine("Option invalid. Returning to the developer menu.");
+                        
                         PressAnyKeyToContinue();
                         break;
                 }
@@ -276,7 +310,7 @@ namespace Komodo_Inusrance_Console
                         DevTeamRepo.AddObjectToRepository(devTeamToAdd);
 
                         Console.WriteLine("Please provide an ID for the development team:");
-                        devTeamToAdd.ID = int.Parse(Console.ReadLine());
+                        devTeamToAdd.ID = GetUserInputAsInt();
 
                         Console.WriteLine("What would you like to name this development team?");
                         devTeamToAdd.Name = Console.ReadLine();
@@ -288,33 +322,44 @@ namespace Komodo_Inusrance_Console
                             AddMultipleDevelopersToTeam(devTeamToAdd.ID);
                         }
                         Console.WriteLine("Your Dev team has been added.");
+                        
                         PressAnyKeyToContinue();
                         break;
                     case "2":
                         PrintDevelopmentTeamsInRepo();
+                        
                         PressAnyKeyToContinue();
                         break;
                     case "3":
                         Console.WriteLine("Please select a development team from the following list to add to view the members of.");
                         PrintDevelopmentTeamsInRepo();
-                        int userSelection = int.Parse(Console.ReadLine());
 
-                        Console.Clear();
-                        DevelopmentTeam userSelectedDevTeam = DevTeamRepo.GetDevelopmentTeamById(userSelection);
-                        List<Developer> devTeamDevList = userSelectedDevTeam.DevTeam;
-                        if(devTeamDevList.Count > 0)
+                        int userSelection = GetUserInputAsInt();
+                        
+                        if (userSelection == 0 || !DevRepo.RepositoryContainsObject(userSelection))
                         {
-                            Console.WriteLine($"ID: {userSelectedDevTeam.ID}, Name: {userSelectedDevTeam.Name}\n" +
-                                $"Dev Team Members:");
-                            foreach (Developer dev in devTeamDevList)
-                            {
-                                Console.WriteLine($"ID: {dev.ID}, Name: {dev.Name}, Has Pluralsight Access: {dev.HasPluralsightAccess}");
-                            }
+                            Console.WriteLine("Please try again. Entry does not contain a valid user number.");
                         }
                         else
                         {
-                            Console.WriteLine($"Sorry, but {userSelectedDevTeam.Name} has no developers assigned.");
+                            Console.Clear();
+                            DevelopmentTeam userSelectedDevTeam = DevTeamRepo.GetDevelopmentTeamById(userSelection);
+                            List<Developer> devTeamDevList = userSelectedDevTeam.DevTeam;
+                            if (devTeamDevList.Count > 0)
+                            {
+                                Console.WriteLine($"ID: {userSelectedDevTeam.ID}, Name: {userSelectedDevTeam.Name}\n" +
+                                    $"Dev Team Members:");
+                                foreach (Developer dev in devTeamDevList)
+                                {
+                                    Console.WriteLine($"ID: {dev.ID}, Name: {dev.Name}, Has Pluralsight Access: {dev.HasPluralsightAccess}");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Sorry, but {userSelectedDevTeam.Name} has no developers assigned.");
+                            }
                         }
+                        
                         PressAnyKeyToContinue();
                         break;
                     case "4":
@@ -484,6 +529,29 @@ namespace Komodo_Inusrance_Console
             int devsDevTeam = DevsOnTeam[ID];
             DevsOnTeam.Add(newID, devsDevTeam);
             DevsOnTeam.Remove(ID);
+        }
+
+        private int GetUserInputAsInt()
+        {
+            int returnValue = 0;
+            while(returnValue == 0)
+            {
+                string userInput = Console.ReadLine();
+                try
+                {
+                    returnValue = int.Parse(userInput);
+                }
+                catch
+                {
+                    returnValue = 0;
+                }
+                if(returnValue == 0)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Please provide a valid integer for the response.");
+                }
+            }
+            return returnValue;
         }
     }
 }

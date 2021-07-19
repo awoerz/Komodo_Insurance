@@ -9,30 +9,35 @@ namespace Komodo_Insurance_Class_Library
     abstract public class BusinessRepository
     {
         //Properties
-        private List<BusinessObjects> _objectRepository = new List<BusinessObjects>();
+        private List<BusinessObjects> _ObjectRepository = new List<BusinessObjects>();
 
         //Create
         public void AddObjectToRepository(BusinessObjects passedObject)
         {
-            _objectRepository.Add(passedObject);
+            _ObjectRepository.Add(passedObject);
         }
 
         //Read
         public List<BusinessObjects> GetBusinessObjects()
         {
-            return _objectRepository;
+            return _ObjectRepository;
         }
 
-        public bool IsEmpty()
+        public BusinessObjects GetBusinessObjectsById(int id)
         {
-            if (_objectRepository.Count == 0)
+            foreach (var obj in _ObjectRepository)
             {
-                return true;
+                if (obj.ID == id)
+                {
+                    return obj;
+                }
             }
-            else
-            {
-                return false;
-            }
+            return null;
+        }
+
+        public bool RepositoryContainsObject(int id)
+        {
+            return _ObjectRepository.Contains(GetBusinessObjectsById(id));
         }
 
         //Update
@@ -41,8 +46,8 @@ namespace Komodo_Insurance_Class_Library
             BusinessObjects originalBusinessObject = GetBusinessObjectsById(originalId);
             if (originalBusinessObject != null)
             {
-                int originalBusinessObjectIndex = _objectRepository.IndexOf(originalBusinessObject);
-                _objectRepository[originalBusinessObjectIndex] = newBusinessObject;
+                int originalBusinessObjectIndex = _ObjectRepository.IndexOf(originalBusinessObject);
+                _ObjectRepository[originalBusinessObjectIndex] = newBusinessObject;
                 return true;
             }
             else
@@ -60,9 +65,9 @@ namespace Komodo_Insurance_Class_Library
                 return false;
             }
 
-            int initialCount = _objectRepository.Count;
-            _objectRepository.Remove(content);
-            if (initialCount > _objectRepository.Count)
+            int initialCount = _ObjectRepository.Count;
+            _ObjectRepository.Remove(content);
+            if (initialCount > _ObjectRepository.Count)
             {
                 return true;
             }
@@ -72,18 +77,6 @@ namespace Komodo_Insurance_Class_Library
             }
         }
 
-        //Private Helper Methods
-        public BusinessObjects GetBusinessObjectsById(int id)
-        {
-            foreach (var obj in _objectRepository)
-            {
-                if (obj.ID == id)
-                {
-                    return obj;
-                }
-            }
-            return null;
-        }
     }
     
     public class DeveloperRepository : BusinessRepository
