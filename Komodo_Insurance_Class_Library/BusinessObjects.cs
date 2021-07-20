@@ -76,6 +76,7 @@ namespace Komodo_Insurance_Class_Library
             }
             else
             {
+                DevTeam = new List<Developer>();
                 return false;
             }
         }
